@@ -16,7 +16,7 @@ function Server() {
     }
 
     io.on("connection", function(socket) {
-      new ConnectionHandler(io, gameManagers).onConnection(socket);
+      new ConnectionHandler(io, socket, gameManagers);
     });
 
     http.listen(port, function(){
