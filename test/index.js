@@ -1,31 +1,157 @@
 "use strict";
 /* jshint mocha: true */
 
-var chai              = require("chai"),
-    chaiAsPromised    = require("chai-as-promised"),
-    q                 = require("q"),
-    MockSocket        = require("./mock-socket"),
-    ConnectionHandler = require("../lib/connection-handler.js");
+var chai           = require("chai"),
+    chaiAsPromised = require("chai-as-promised"),
+    q              = require("q"),
+    io             = require("socket.io-client"),
+    Server         = require("../lib/server"),
+    MessageType    = require("../lib/message-type"),
+    ResponseCode   = require("../lib/response-code"),
+    config         = require("../config");
 
 chai.use(chaiAsPromised);
 var assert = chai.assert;
 
-describe("ConnectionHandler", function() {
-  it("sends an error if an unrecognized command is sent", function() {
-    var mockSocket = new MockSocket();
-    mockSocket.emit = function(event, msg) { // jshint ignore:line
-      assert.equal(event, "gameError");
-    };
 
-    new ConnectionHandler(null, mockSocket, null);
-    assert.ok(mockSocket.mockEmit.action, "action emitter undefined");
-    mockSocket.mockEmit.action({ cmd: "made-up-cmd" });
+function connectClient() {
+  var deferred = q.defer();
+
+  var socket = io.connect("http://localhost:" + config.port, {
+    transports: ["websocket"],
+    multiplex: false
   });
 
-  it("responds appropriately to a \"create\" message", function() {
-    var mockSocket = new MockSocket();
-    new ConnectionHandler(null, mockSocket, {});
-    mockSocket.mockEmit.action({ cmd: "create" }, assert.ok);
+  socket.on("connect", function() {
+    deferred.resolve(socket);
+  });
+
+  return deferred.promise;
+}
+
+var createGame = q.promised(function (socket) {
+  var deferred = q.defer();
+
+  socket.emit("action", { cmd: MessageType.CreateGame },
+    function ack(gameId) {
+      deferred.resolve(gameId);
+    }
+  );
+
+  return deferred.promise;
+});
+
+var joinGame = q.promised(function (socket, gameId) {
+  var deferred = q.defer();
+
+  var msg = {
+    cmd: MessageType.JoinGame,
+    id: gameId
+  };
+
+  socket.emit("action", msg, function(result) {
+    deferred.resolve(result);
+  });
+
+  return deferred.promise;
+});
+
+describe("ConnectionHandler", function() {
+  var server;
+
+  beforeEach(function(done) {
+    server = new Server();
+    server.on("listening", done);
+  });
+
+  afterEach(function(done) {
+    server.destroy();
+    server.on("close", done);
+    server = null;
+  });
+
+  it("sends an error if an unrecognized command is sent", function(done) {
+    var qSocket = connectClient();
+    qSocket.invoke("emit", "action", { cmd: "made-up-cmd" });
+    qSocket.invoke("on", "gameError", function() {
+      done();
+    });
+  });
+
+  it("responds appropriately to a \"create\" message", function(done) {
+    connectClient()
+      .then(createGame)
+      .done(function(gameId) {
+        assert.ok(gameId);
+        done();
+      });
+  });
+
+  it("doesn't allow a user to create two games", function(done) {
+    var qSocket = connectClient();
+    qSocket.invoke("on", "gameError", function() {
+      done();
+    });
+
+    qSocket
+      .then(createGame)
+      .thenResolve(qSocket)
+      .then(createGame);
+  });
+
+  it("allows a user to join an existing game", function(done) {
+    var qSocket1 = connectClient();
+    var qSocket2 = connectClient();
+
+    var qGameId = createGame(qSocket1);
+
+    joinGame(qSocket2, qGameId)
+      .done(function(response) {
+        assert.equal(response.result, ResponseCode.JoinOk);
+        assert.ok(response.id);
+        done();
+      });
+  });
+
+  it("relays chat messages to in-game players", function(done) {
+    var qSockets = [];
+    for(var i = 0; i < 4; ++i)
+      qSockets[i] = connectClient();
+
+    var qGameId = createGame(qSockets[0]);
+
+    var qPlayerId1 = joinGame(qSockets[1], qGameId);
+    joinGame(qSockets[2], qGameId);
+
+    var chatMsg = {
+      cmd: "chat",
+      message: "sup"
+    };
+    qPlayerId1.thenResolve(qSockets[0])
+      .invoke("emit", "action", chatMsg, ack);
+
+    qSockets[1].invoke("on", "chat", gotChat);
+    qSockets[2].invoke("on", "chat", gotChat);
+    qSockets[3].invoke("on", "chat", didntGetChat);
+    qSockets[0].invoke("on", "chat", didntGetChat);
+
+    var responsesReceived = 0;
+    function gotChat(msg) {
+      assert.eventually.equal(qPlayerId1, msg.playerId);
+      assert.equal(msg.message, "sup");
+      if(++responsesReceived === 3)
+        done();
+    }
+
+    function ack(response) {
+      assert.equal(response.result, ResponseCode.ChatSent);
+      if(++responsesReceived === 3)
+        done();
+    }
+
+    function didntGetChat() {
+      assert.fail();
+    }
   });
 });
 
