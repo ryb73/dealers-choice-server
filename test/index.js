@@ -13,6 +13,13 @@ const chai           = require("chai"),
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
+function makeDeferrals(n) {
+  var result = new Array(n);
+  for(let i = 0; i < n; ++i) {
+    result[i] = q.defer();
+  }
+  return result;
+}
 
 function connectClient() {
   let deferred = q.defer();
@@ -85,12 +92,11 @@ describe("ConnectionHandler", function() {
     });
   });
 
-  it("responds appropriately to a \"create\" message", function(done) {
-    connectClient()
+  it("responds appropriately to a \"create\" message", function() {
+    return connectClient()
       .then(createGame)
-      .done(function(gameId) {
-        assert.ok(gameId);
-        done();
+      .then(function(response) {
+        assert.equal(response.result, ResponseCode.CreateOk);
       });
   });
 
@@ -106,9 +112,9 @@ describe("ConnectionHandler", function() {
       .done(createGame);
   });
 
-  it("allows a user to join an existing game", function(done) {
+  it("allows a user to join an existing game", function() {
     let qSockets = prepareNPlayers(2);
-    let qGameId = createGame(qSockets[0]);
+    let qGameId = createGame(qSockets[0]).get("gameId");
 
     // When the second player joins, the first player
     // will be notified and given the new player's info.
@@ -135,63 +141,69 @@ describe("ConnectionHandler", function() {
         defPlayerId2.resolve(response.id);
       });
 
-    q.all([ defPlayerId1.promise, defPlayerId2.promise ])
+    return q.all([ defPlayerId1.promise, defPlayerId2.promise ])
       .spread(function(playerId1, playerId2) {
         assert.equal(playerId1, playerId2, "IDs not equal");
-        done();
-      })
-      .done();
+      });
   });
 
-  it("relays chat messages to in-game players", function(done) {
+  it("relays chat messages to in-game players", function() {
     let qSockets = prepareNPlayers(4);
 
-    let qGameId = createGame(qSockets[0]);
+    let qCreateResult = createGame(qSockets[0]);
+    let qGameId = qCreateResult.get("gameId");
+    let qPlayerId1 = qCreateResult.get("playerId");
 
-    let qPlayerId1 = joinGame(qSockets[1], qGameId);
-    joinGame(qSockets[2], qGameId);
+    let qJoinPlayer2 = joinGame(qSockets[1], qGameId);
+    let qJoinPlayer3 = joinGame(qSockets[2], qGameId);
 
     // Once all players have joined, send chat
-    //TODO: make sure this works
     let chatMsg = {
       cmd: "chat",
       message: "sup"
     };
-    qPlayerId1.thenResolve(qSockets[0])
+    q.all([ qJoinPlayer2, qJoinPlayer3 ])
+      .thenResolve(qSockets[0])
       .invoke("emit", "action", chatMsg, ack);
 
     // The player that sent the chat and the player
     // that's not even in the game should not get the
     // chat; the other players should.
     qSockets[0].invoke("on", "chat", didntGetChat);
-    qSockets[1].invoke("on", "chat", gotChat);
-    qSockets[2].invoke("on", "chat", gotChat);
+    qSockets[1].invoke("on", "chat", gotChat.bind(null, 0));
+    qSockets[2].invoke("on", "chat", gotChat.bind(null, 1));
     qSockets[3].invoke("on", "chat", didntGetChat);
 
-    let responsesReceived = 0; // ugh
-    function gotChat(msg) {
-      assert.eventually.equal(qPlayerId1, msg.playerId);
+    var deferrals = makeDeferrals(4);
+    function gotChat(defferedIdx, msg) {
+      assert.eventually.equal(qPlayerId1, msg.playerId)
+        .then(deferrals[2].resolve)
+        .catch(deferrals[2].reject);
+
       assert.equal(msg.message, "sup");
-      if(++responsesReceived === 3)
-        done();
+      deferrals[defferedIdx].resolve();
     }
 
     // Make sure the player that sent the chat gets
     // an acknowledgement.
     function ack(response) {
       assert.equal(response.result, ResponseCode.ChatSent);
-      if(++responsesReceived === 3)
-        done();
+      deferrals[3].resolve();
     }
 
     function didntGetChat() {
       assert.fail();
     }
+
+    var promises = deferrals.map(function(deferred) {
+      return deferred.promise;
+    });
+    return q.all(promises);
   });
 
   it("only allows 6 players", function(done) {
     let qSockets = prepareNPlayers(7);
-    let qGameId = createGame(qSockets[0]);
+    let qGameId = createGame(qSockets[0]).get("gameId");
 
     // First, we'll allow five players to join
     // for a total of 6 (including the creator)
@@ -219,7 +231,7 @@ describe("ConnectionHandler", function() {
 
   it("allows players to leave", function(done) {
     let qSockets = prepareNPlayers(2);
-    let qGameId = createGame(qSockets[0]);
+    let qGameId = createGame(qSockets[0]).get("gameId");
 
     joinGame(qSockets[1], qGameId)
       .done(function(response) {
@@ -237,8 +249,8 @@ describe("ConnectionHandler", function() {
   it("can list the current games", function(done) {
     let qSockets = prepareNPlayers(4);
 
-    let qGameId1 = createGame(qSockets[0]);
-    let qGameId2 = createGame(qSockets[1]);
+    let qGameId1 = createGame(qSockets[0]).get("gameId");
+    let qGameId2 = createGame(qSockets[1]).get("gameId");
     let qPlayer3Joined = joinGame(qSockets[2], qGameId1);
 
     q.all([ qGameId1, qGameId2, qPlayer3Joined ])
@@ -271,7 +283,7 @@ describe("ConnectionHandler", function() {
 
   it("deletes the game if the last player leaves", function(done) {
     let qSockets = prepareNPlayers(2);
-    let qGameId = createGame(qSockets[0]);
+    let qGameId = createGame(qSockets[0]).get("gameId");
     joinGame(qSockets[1], qGameId)
       .thenResolve(qSockets[0])
       .invoke("emit", "action", { cmd: MessageType.Leave }, leaveAck)
