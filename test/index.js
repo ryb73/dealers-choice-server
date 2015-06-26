@@ -262,12 +262,15 @@ describe("ConnectionHandler", function() {
   });
 
   describe("during the game", function() {
-    it.skip("starts the game with rock paper scissors", function() {
+    it("starts the game with rock paper scissors", function() {
       let qSockets = prepareNPlayers(2);
       let qGameId = act.createGame(qSockets[0]).get("gameId");
 
-      act.joinGame(qSockets[1], qGameId)
-        .then(act.startGame.bind(null, qSockets[0]));
+      return act.joinGame(qSockets[1], qGameId)
+        .then(act.startGame.bind(null, qSockets[0]))
+        .then(function(response) {
+          assert.equal(response.result, ResponseCode.StartOk);
+        });
     });
   });
 });
