@@ -12,6 +12,8 @@ const chai           = require("chai"),
       Server         = require("../lib/server"),
       MessageType    = require("../lib/message-type"),
       ResponseCode   = require("../lib/response-code"),
+      RpsMoves       = require("../lib/game-managers/choice-provider/rock-paper-scissors/rps-moves"),
+      RpsConclusion  = require("../lib/game-managers/choice-provider/rock-paper-scissors/rps-conclusion"),
       act            = require("./act");
 
 chai.use(chaiAsPromised);
@@ -130,7 +132,7 @@ describe("ConnectionHandler", function() {
       qSockets[2].invoke("on", "chat", gotChat.bind(null, 1));
       qSockets[3].invoke("on", "chat", didntGetChat);
 
-      var deferrals = makeDeferrals(4);
+      let deferrals = makeDeferrals(4);
       function gotChat(defferedIdx, msg) {
         assert.eventually.equal(qPlayerId1, msg.playerId)
           .then(deferrals[2].resolve)
@@ -151,7 +153,7 @@ describe("ConnectionHandler", function() {
         assert.fail();
       }
 
-      var promises = deferrals.map(function(deferred) {
+      let promises = deferrals.map(function(deferred) {
         return deferred.promise;
       });
       return q.all(promises);
@@ -171,7 +173,7 @@ describe("ConnectionHandler", function() {
       q.all(qJoinResponses)
         .then(function(joinResponses) {
           // Make sure everyone so far was allowed to join
-          for(var response of joinResponses) {
+          for(let response of joinResponses) {
             assert.equal(response.result, ResponseCode.JoinOk);
           }
 
@@ -263,20 +265,66 @@ describe("ConnectionHandler", function() {
 
   describe("during the game", function() {
     it("starts the game with rock paper scissors", function() {
-      let qSockets = prepareNPlayers(2);
-      let qGameId = act.createGame(qSockets[0]).get("gameId");
+      let qSockets = prepareNPlayers(3);
 
-      return act.joinGame(qSockets[1], qGameId)
-        .then(act.startGame.bind(null, qSockets[0]))
-        .then(function(response) {
-          assert.equal(response.result, ResponseCode.StartOk);
+      let qCreateResult = act.createGame(qSockets[0]);
+      let qGameId = qCreateResult.get("gameId");
+      let qPlayerId1 = qCreateResult.get("playerId");
+
+      q.all([ act.joinGame(qSockets[1], qGameId),
+              act.joinGame(qSockets[2], qGameId) ])
+        .then(function() {
+          let response = act.startGame(qSockets[0]);
+          assert.eventually.equal(response.get("result"),
+            ResponseCode.StartOk);
         });
+
+      qSockets[0].invoke("on", "action", handleAction.bind(null, 0));
+      qSockets[1].invoke("on", "action", handleAction.bind(null, 1));
+      qSockets[2].invoke("on", "action", handleAction.bind(null, 2));
+
+      function handleAction(playerIdx, msg) {
+        switch(msg.cmd) {
+          case MessageType.RockPaperScissors:
+            handleRps(playerIdx, msg);
+            break;
+          case MessageType.RpsConclusion:
+            handleConclusion(playerIdx, msg);
+        }
+      }
+
+      function handleRps(playerIdx, msg) {
+        let outMsg = {
+          cmd: MessageType.Choice,
+          answer: { handlerId: msg.handlerId }
+        };
+
+        if(playerIdx === 0) {
+          outMsg.answer.move = RpsMoves.Rock;
+        } else {
+          outMsg.answer.move = RpsMoves.Scissors;
+        }
+        qSockets[playerIdx].invoke("emit", "action", outMsg);
+      }
+
+      let deferrals = makeDeferrals(3);
+
+      function handleConclusion(playerIdx, msg) {
+        assert.equal(msg.conclusion, RpsConclusion.Winner);
+        assert.eventually.equal(qPlayerId1, msg.winnerId);
+        deferrals[playerIdx].resolve();
+      }
+
+      let promises = deferrals.map(function(deferred) {
+        return deferred.promise;
+      });
+      return q.all(promises);
     });
   });
 });
 
 function makeDeferrals(n) {
-  var result = new Array(n);
+  let result = new Array(n);
   for(let i = 0; i < n; ++i) {
     result[i] = q.defer();
   }
