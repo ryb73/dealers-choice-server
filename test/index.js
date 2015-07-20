@@ -34,7 +34,7 @@ describe("ConnectionHandler", function() {
   });
 
   describe("before the game", function() {
-    it.only("sends an error if an unrecognized command is sent", function(done) {
+    it("sends an error if an unrecognized command is sent", function(done) {
       let qSocket = connectClient();
       qSocket.invoke("emit", "action", { cmd: "made-up-cmd" });
       qSocket.invoke("on", "gameError", function() {
