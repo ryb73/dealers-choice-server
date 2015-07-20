@@ -57,7 +57,8 @@ function MockGame($numPlayers, $moves, $expectation) {
 
       checkAnswers(msg.answers);
 
-      // If we have a winner, then compare it to our expected winner
+      // If we have a winner, then compare it to our
+      // expected winner
       switch(msg.conclusion) {
         case RpsConclusion.NextRound:
         case RpsConclusion.Winner:

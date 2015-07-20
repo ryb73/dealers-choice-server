@@ -89,7 +89,9 @@ describe("RockPaperScissors", function() {
 function runGame(gameMoves, winner, expectation) {
   let game = new MockGame(gameMoves[0].length, gameMoves, expectation);
   let rps = new RockPaperScissors(game);
-  let onAction = game.generateActionHandler(rps);
+  let onAction = {
+    broadcast: game.generateActionHandler(rps)
+  };
 
   let qWinnerTest = assert.eventually
     .equal(rps.handleIt(onAction), game.players[winner].id);
