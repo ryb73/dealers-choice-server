@@ -1,7 +1,7 @@
 "use strict";
 
 const q           = require("q"),
-      MessageType = require("../lib/message-type");
+      MessageType = require("dc-constants").MessageType;
 
 let act = {};
 

@@ -3,8 +3,9 @@
 const chai          = require("chai"),
       _             = require("lodash"),
       q             = require("q"),
-      MessageType   = require("../../../lib/message-type"),
-      RpsConclusion = require("../../../lib/game-managers/choice-provider/rock-paper-scissors/rps-conclusion");
+      dcConstants   = require("dc-constants"),
+      MessageType   = dcConstants.MessageType,
+      RpsConclusion = dcConstants.RpsConclusion;
 
 const assert = chai.assert;
 

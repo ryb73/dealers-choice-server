@@ -8,9 +8,10 @@ config.logLevel = "warn";
 const chai              = require("chai"),
       chaiAsPromised    = require("chai-as-promised"),
       q                 = require("q"),
+      dcConstants       = require("dc-constants"),
+      RpsMoves          = dcConstants.RpsMoves,
+      RpsConclusion     = dcConstants.RpsConclusion,
       MockGame          = require("./mock-game"),
-      RpsMoves          = require("../../../lib/game-managers/choice-provider/rock-paper-scissors/rps-moves"),
-      RpsConclusion     = require("../../../lib/game-managers/choice-provider/rock-paper-scissors/rps-conclusion"),
       RockPaperScissors = require("../../../lib/game-managers/choice-provider/rock-paper-scissors");
 
 chai.use(chaiAsPromised);

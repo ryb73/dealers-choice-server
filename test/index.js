@@ -9,11 +9,12 @@ const chai           = require("chai"),
       chaiAsPromised = require("chai-as-promised"),
       q              = require("q"),
       io             = require("socket.io-client"),
+      dcConstants    = require("dc-constants"),
+      MessageType    = dcConstants.MessageType,
+      ResponseCode   = dcConstants.ResponseCode,
+      RpsMoves       = dcConstants.RpsMoves,
+      RpsConclusion  = dcConstants.RpsConclusion,
       Server         = require("../lib/server"),
-      MessageType    = require("../lib/message-type"),
-      ResponseCode   = require("../lib/response-code"),
-      RpsMoves       = require("../lib/game-managers/choice-provider/rock-paper-scissors/rps-moves"),
-      RpsConclusion  = require("../lib/game-managers/choice-provider/rock-paper-scissors/rps-conclusion"),
       act            = require("./act");
 
 chai.use(chaiAsPromised);

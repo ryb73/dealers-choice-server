@@ -5,9 +5,10 @@ const config = require("config").get("dc-server");
 config.testing = true;
 config.logLevel = "warn";
 
-const chai        = require("chai"),
-      sinon       = require("sinon"),
-      Replenish   = require("../../lib/game-managers/choice-provider/replenish");
+const chai      = require("chai"),
+      sinon     = require("sinon"),
+      BuyFromAutoExchangeOption = require("dc-constants").BuyFromAutoExchangeOption,
+      Replenish = require("../../lib/game-managers/choice-provider/replenish");
 
 const assert = chai.assert;
 
@@ -29,12 +30,15 @@ describe("Replenish", function() {
 
     handler.handleIt(callbacks)
       .done(function(result) {
-        assert.equal(result, 10);
+        assert.equal(result, BuyFromAutoExchangeOption.FourThou);
         done();
       });
 
-    // Player 2 is trying to answer for player 1 -- don't let him
+    // Player 2 is trying to answer for player 1 --
+    // don't let him. Also don't allow player 1 to
+    // provide a nonsense option
     handler.giveAnswer(p2, { selection: 4 });
-    handler.giveAnswer(p1, { selection: 10 });
+    handler.giveAnswer(p1, { selection: 9999999 });
+    handler.giveAnswer(p1, { selection: BuyFromAutoExchangeOption.FourThou });
   });
 });
