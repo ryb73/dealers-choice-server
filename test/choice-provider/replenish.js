@@ -18,9 +18,14 @@ describe("Replenish", function() {
 
     let handler = new Replenish(p1);
 
-    let callbacks = { broadcast: function() {} };
+    let callbacks = { broadcast: function() {}, toOthers: function() {} };
+
+    // A ReplenishOption message should be broadcast and
+    // then a ReplenishResult message should be sent to
+    // everyone but the replenishing player
     let cbMock = sinon.mock(callbacks);
     cbMock.expects("broadcast").once();
+    cbMock.expects("toOthers").once();
 
     handler.handleIt(callbacks)
       .done(function(result) {
