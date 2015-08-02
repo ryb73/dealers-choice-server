@@ -6,13 +6,11 @@ config.testing = true;
 config.logLevel = "warn";
 
 const chai           = require("chai"),
-      chaiAsPromised = require("chai-as-promised"),
       sinon          = require("sinon"),
       dcEngine       = require("dc-engine"),
       Player         = dcEngine.Player,
       PromptForBids  = require("../../lib/game-managers/choice-provider/prompt-for-bids");
 
-chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe("PromptForBids", function() {
@@ -41,7 +39,9 @@ describe("PromptForBids", function() {
 
     return qResult.then(function(result) {
       assert.equal(result.car, car);
-      assert.equal(result.bidder, player3);
+      assert.equal(result.buyer, player3);
+      assert.equal(result.seller, player1);
+      mockCb.verify();
     });
   });
 });
