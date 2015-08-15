@@ -10,23 +10,27 @@ const chai           = require("chai"),
       sinon          = require("sinon"),
       dcEngine       = require("dc-engine"),
       Player         = dcEngine.Player,
-      PromptOpenLot  = require("../../lib/game-managers/choice-provider/prompt-open-lot");
+      PromptAcceptCounterOffer = require("../../lib/game-managers/choice-provider/prompt-accept-counter-offer");
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
-describe("PromptOpenLot", function() {
+describe("PromptAcceptCounterOffer", function() {
   it("takes player's answer", function() {
-    let player = new Player(1000);
-
-    let callbacks = { broadcast: function() {}, toOthers: function() {} };
+    let callbacks = { toOthers: function() {} };
     let mockCb = sinon.mock(callbacks);
-    mockCb.expects("broadcast").once();
-    mockCb.expects("toOthers").once();
+    mockCb.expects("toOthers").twice();
 
-    let choiceProvider = new PromptOpenLot(player);
+    let offer = {
+      seller: new Player(1000),
+      buyer: new Player(1000),
+      amount: 100,
+      car: {}
+    };
+
+    let choiceProvider = new PromptAcceptCounterOffer(offer);
     let qResult = choiceProvider.handleIt(callbacks);
-    choiceProvider.giveAnswer(player, true);
+    choiceProvider.giveAnswer(offer.buyer, true);
 
     return qResult.then(function(result) {
       assert.equal(result, true);
