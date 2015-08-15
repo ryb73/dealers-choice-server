@@ -20,7 +20,7 @@ describe("PromptForBids", function() {
     let player3 = new Player(1000);
 
     let car = { id: 1 };
-    player1.gainCar(car);
+    player1.buyCar(car, 0);
 
     let callbacks = { broadcast: function() {} };
     let mockCb = sinon.mock(callbacks);

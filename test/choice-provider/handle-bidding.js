@@ -24,7 +24,7 @@ describe("HandleBidding", function() {
     let player3 = new Player(1000);
 
     let car = new Car(1, 0);
-    player1.gainCar(car);
+    player1.buyCar(car, 0);
 
     let callbacks = {
       broadcast: function(action, msg) {
