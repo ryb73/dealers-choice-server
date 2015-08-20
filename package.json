@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --harmony --harmony-proxies --recursive",
-    "cover": "node --harmony --harmony-proxies ./node_modules/istanbul-harmony/lib/cli.js cover --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --recursive"
+    "cover": "node --harmony --harmony-proxies ./node_modules/istanbul-harmony/lib/cli.js cover --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --recursive",
+    "start": "node --harmony --harmony-proxies ."
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
     "component-emitter": "^1.2.0",
     "config": "^1.14.0",
     "express": "^4.12.3",
+    "fb": "^0.7.0",
     "give-unique-id": "^1.0.0",
     "iterator-to-array": "^1.0.0",
     "lodash": "^3.6.0",
