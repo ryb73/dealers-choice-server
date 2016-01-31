@@ -82,7 +82,7 @@ function MockGame($numPlayers, $moves, $expectation) {
   // what's in our moves array
   function checkAnswers(answers) {
     answers.forEach(function(answer) {
-      let playerIdx = _.findIndex(players, "id", answer.playerId);
+      let playerIdx = _.findIndex(players, { id: answer.playerId });
       assert.isAbove(playerIdx, -1);
       assert.equal(answer.move, moves[curGame][playerIdx].move);
     });

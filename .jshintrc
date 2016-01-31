@@ -1,5 +1,5 @@
 {
-  "globalstrict": true,
+  "strict": "global",
   "esnext": true,
   "node": true,
   "predef": [ "-console" ],
