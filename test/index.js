@@ -1,13 +1,14 @@
 "use strict";
 /* jshint mocha: true */
 
-const config = require("config").get("dc-server");
+const config = require("config").get("dc-server"),
+      q      = require("q");
 config.testing = true;
 config.logLevel = "warn";
+config.validateUserId = function() { return q(true); };
 
 const chai           = require("chai"),
       chaiAsPromised = require("chai-as-promised"),
-      q              = require("q"),
       io             = require("socket.io-client"),
       dcConstants    = require("dc-constants"),
       MessageType    = dcConstants.MessageType,
@@ -261,6 +262,16 @@ describe("ConnectionHandler", function() {
         assert.equal(gameList.length, 0);
         done();
       }
+    });
+
+    it("allows the user to register", function(done) {
+      let cmd = { cmd: MessageType.RegisterUser, userId: 1 };
+      connectClient()
+        .done(function(socket) {
+          socket.emit("action", cmd, function() {
+            done();
+          });
+        });
     });
   });
 
