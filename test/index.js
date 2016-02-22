@@ -49,6 +49,7 @@ describe("ConnectionHandler", function() {
         .then(act.createGame)
         .then(function(response) {
           assert.equal(response.result, ResponseCode.CreateOk);
+          assert.equal(response.gameState.users.length, 1);
         });
     });
 
@@ -79,23 +80,25 @@ describe("ConnectionHandler", function() {
           defPlayerId1.resolve(player.id);
 
           // Make sure no secret info was sent
-          assert.isUndefined(player.money ||
-                       player.dcCards ||
-                       player.insurances ||
-                       player.blueBook, "secret info sent");
+          assert.isUndefined(player.money || player.dcCards || player.insurances || player.blueBook);
         });
       });
 
       act.joinGame(qSockets[1], qGameId)
         .done(function(response) {
-          assert.equal(response.result, ResponseCode.JoinOk, "join not ok");
-          assert.ok(response.id, "no ID");
+          assert.equal(response.result, ResponseCode.JoinOk);
+          assert.ok(response.id);
+
+          assert.equal(response.gameState.users.length, 2);
+          assert.ok(response.gameState.users[0].player.money);
+          assert.isUndefined(response.gameState.users[1].player.money);
+
           defPlayerId2.resolve(response.id);
         });
 
       return q.all([ defPlayerId1.promise, defPlayerId2.promise ])
         .spread(function(playerId1, playerId2) {
-          assert.equal(playerId1, playerId2, "IDs not equal");
+          assert.equal(playerId1, playerId2);
         });
     });
 
@@ -136,7 +139,7 @@ describe("ConnectionHandler", function() {
 
       let deferrals = makeDeferrals(4);
       function gotChat(defferedIdx, msg) {
-        assert.eventually.equal(qPlayerId1, msg.playerId)
+        assert.eventually.equal(qPlayerId1, msg.playerId, "player IDs unequal")
           .then(deferrals[2].resolve)
           .catch(deferrals[2].reject);
 
@@ -227,9 +230,9 @@ describe("ConnectionHandler", function() {
           .spread(function(gameId1, gameId2) {
             for(let game of gameList) {
               if(game.id === gameId1) {
-                assert.equal(game.playerCount, 2);
+                assert.equal(game.users.length, 2);
               } else if(game.id === gameId2) {
-                assert.equal(game.playerCount, 1);
+                assert.equal(game.users.length, 1);
               } else {
                 assert.fail();
               }
@@ -362,5 +365,10 @@ function prepareNPlayers(n) {
   let qSockets = [];
   for(let i = 0; i < n; ++i)
     qSockets[i] = connectClient();
-  return qSockets;
+
+  return qSockets
+    .map(function(qSocket, index) {
+      return act.registerUser(qSocket, index)
+        .thenResolve(qSocket);
+    });
 }

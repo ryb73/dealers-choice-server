@@ -5,48 +5,42 @@ const q           = require("q"),
 
 let act = {};
 
-let createGame = q.promised(function(socket) {
+function doEmit(socket, msg) {
   let deferred = q.defer();
 
-  socket.emit("action", { cmd: MessageType.CreateGame },
-    function ack(gameId) {
-      deferred.resolve(gameId);
-    }
-  );
+  socket.emit("action", msg, function(result) {
+    deferred.resolve(result);
+  });
 
   return deferred.promise;
+}
+
+let createGame = q.promised(function(socket) {
+  return doEmit(socket, { cmd: MessageType.CreateGame });
 });
 act.createGame = createGame;
 
 let joinGame = q.promised(function(socket, gameId) {
-  let deferred = q.defer();
-
-  let msg = {
+  return doEmit(socket, {
     cmd: MessageType.JoinGame,
     id: gameId
-  };
-
-  socket.emit("action", msg, function(result) {
-    deferred.resolve(result);
   });
-
-  return deferred.promise;
 });
 act.joinGame = joinGame;
 
 let startGame = q.promised(function(socket) {
-  let deferred = q.defer();
-
-  let msg = {
+  return doEmit(socket, {
     cmd: MessageType.StartGame
-  };
-
-  socket.emit("action", msg, function(result) {
-    deferred.resolve(result);
   });
-
-  return deferred.promise;
 });
 act.startGame = startGame;
+
+let registerUser = q.promised(function(socket, userId) {
+  return doEmit(socket, {
+    cmd: MessageType.RegisterUser,
+    userId: userId
+  });
+});
+act.registerUser = registerUser;
 
 module.exports = act;
