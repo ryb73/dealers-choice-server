@@ -80,7 +80,7 @@ describe("ConnectionHandler", function() {
           defPlayerId1.resolve(player.id);
 
           // Make sure no secret info was sent
-          assert.isUndefined(player.money || player.dcCards || player.insurances || player.blueBook);
+          assert.isUndefined(player.money || player.blueBook);
         });
       });
 
