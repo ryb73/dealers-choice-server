@@ -67,7 +67,7 @@ describe("ConnectionHandler", function() {
 
     it("allows a user to join an existing game", function() {
       let qSockets = prepareNPlayers(2);
-      let qGameId = act.createGame(qSockets[0]).get("gameId");
+      let qGameId = act.createGame(qSockets[0]).get("gameDescription").get("id");
 
       // When the second player joins, the first player
       // will be notified and given the new player's info.
@@ -87,13 +87,13 @@ describe("ConnectionHandler", function() {
       act.joinGame(qSockets[1], qGameId)
         .done(function(response) {
           assert.equal(response.result, ResponseCode.JoinOk);
-          assert.ok(response.id);
+          assert.ok(response.playerId);
 
           assert.equal(response.gameState.users.length, 2);
           assert.ok(response.gameState.users[0].player.money);
           assert.isUndefined(response.gameState.users[1].player.money);
 
-          defPlayerId2.resolve(response.id);
+          defPlayerId2.resolve(response.playerId);
         });
 
       return q.all([ defPlayerId1.promise, defPlayerId2.promise ])
@@ -114,7 +114,7 @@ describe("ConnectionHandler", function() {
       let qSockets = prepareNPlayers(4);
 
       let qCreateResult = act.createGame(qSockets[0]);
-      let qGameId = qCreateResult.get("gameId");
+      let qGameId = qCreateResult.get("gameDescription").get("id");
       let qPlayerId1 = qCreateResult.get("playerId");
 
       let qJoinPlayer2 = act.joinGame(qSockets[1], qGameId);
@@ -166,7 +166,7 @@ describe("ConnectionHandler", function() {
 
     it("only allows 6 players", function(done) {
       let qSockets = prepareNPlayers(7);
-      let qGameId = act.createGame(qSockets[0]).get("gameId");
+      let qGameId = act.createGame(qSockets[0]).get("gameDescription").get("id");
 
       // First, we'll allow five players to join
       // for a total of 6 (including the creator)
@@ -194,14 +194,13 @@ describe("ConnectionHandler", function() {
 
     it("allows players to leave", function(done) {
       let qSockets = prepareNPlayers(2);
-      let qGameId = act.createGame(qSockets[0]).get("gameId");
+      let qGameId = act.createGame(qSockets[0]).get("gameDescription").get("id");
 
       act.joinGame(qSockets[1], qGameId)
         .done(function(response) {
           assert.equal(response.result, ResponseCode.JoinOk);
 
-          qSockets[1].invoke("emit", "action",
-            { cmd: MessageType.Leave }, ack);
+          qSockets[1].invoke("emit", "action", { cmd: MessageType.Leave }, ack);
         });
 
       function ack() {
@@ -212,8 +211,8 @@ describe("ConnectionHandler", function() {
     it("can list the current games", function(done) {
       let qSockets = prepareNPlayers(4);
 
-      let qGameId1 = act.createGame(qSockets[0]).get("gameId");
-      let qGameId2 = act.createGame(qSockets[1]).get("gameId");
+      let qGameId1 = act.createGame(qSockets[0]).get("gameDescription").get("id");
+      let qGameId2 = act.createGame(qSockets[1]).get("gameDescription").get("id");
       let qPlayer3Joined = act.joinGame(qSockets[2], qGameId1);
 
       q.all([ qGameId1, qGameId2, qPlayer3Joined ])
@@ -246,7 +245,7 @@ describe("ConnectionHandler", function() {
 
     it("deletes the game if the last player leaves", function(done) {
       let qSockets = prepareNPlayers(2);
-      let qGameId = act.createGame(qSockets[0]).get("gameId");
+      let qGameId = act.createGame(qSockets[0]).get("gameDescription").get("id");
       act.joinGame(qSockets[1], qGameId)
         .thenResolve(qSockets[0])
         .invoke("emit", "action", { cmd: MessageType.Leave }, leaveAck)
@@ -283,7 +282,7 @@ describe("ConnectionHandler", function() {
       let qSockets = prepareNPlayers(3);
 
       let qCreateResult = act.createGame(qSockets[0]);
-      let qGameId = qCreateResult.get("gameId");
+      let qGameId = qCreateResult.get("gameDescription").get("id");
       let qPlayerId1 = qCreateResult.get("playerId");
 
       q.all([ act.joinGame(qSockets[1], qGameId),
