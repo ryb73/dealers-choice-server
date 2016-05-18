@@ -7,7 +7,8 @@ config.testing = true;
 config.logLevel = "warn";
 config.validateUserId = function() { return q(true); };
 
-const chai           = require("chai"),
+const _              = require("lodash"),
+      chai           = require("chai"),
       chaiAsPromised = require("chai-as-promised"),
       io             = require("socket.io-client"),
       dcConstants    = require("dc-constants"),
@@ -69,37 +70,30 @@ describe("ConnectionHandler", function() {
       let qSockets = prepareNPlayers(2);
       let qGameId = act.createGame(qSockets[0]).get("gameDescription").get("id");
 
+      let promises = [];
+
       // When the second player joins, the first player
       // will be notified and given the new player's info.
       // For this test, we'll compare the info the first
       // player gets to the info the second player gets.
-      let defPlayerId1 = q.defer();
-      let defPlayerId2 = q.defer();
+      promises[0] = q.defer();
       qSockets[0].done(function(socket) {
-        socket.on("playerJoined", function(player) {
-          defPlayerId1.resolve(player.id);
+        socket.on("action", function(action) {
+          if(action.cmd !== MessageType.PendingGameUpdated)
+            return;
 
-          // Make sure no secret info was sent
-          assert.isUndefined(player.money || player.blueBook);
+          if(action.gameDescription.users.length > 1)
+            promises[0].resolve();
         });
       });
 
-      act.joinGame(qSockets[1], qGameId)
-        .done(function(response) {
+      promises[1] = act.joinGame(qSockets[1], qGameId)
+        .then(function(response) {
           assert.equal(response.result, ResponseCode.JoinOk);
-          assert.ok(response.playerId);
-
           assert.equal(response.gameState.users.length, 2);
-          assert.ok(response.gameState.users[0].player.money);
-          assert.isUndefined(response.gameState.users[1].player.money);
-
-          defPlayerId2.resolve(response.playerId);
         });
 
-      return q.all([ defPlayerId1.promise, defPlayerId2.promise ])
-        .spread(function(playerId1, playerId2) {
-          assert.equal(playerId1, playerId2);
-        });
+      return q.all(promises);
     });
 
     it("sends an error when joining non-existent game", function() {
@@ -192,20 +186,33 @@ describe("ConnectionHandler", function() {
         });
     });
 
-    it("allows players to leave", function(done) {
+    it("allows players to leave", function() {
       let qSockets = prepareNPlayers(2);
       let qGameId = act.createGame(qSockets[0]).get("gameDescription").get("id");
+
+      let deferreds = _.range(2).map(q.defer);
 
       act.joinGame(qSockets[1], qGameId)
         .done(function(response) {
           assert.equal(response.result, ResponseCode.JoinOk);
 
-          qSockets[1].invoke("emit", "action", { cmd: MessageType.Leave }, ack);
+          qSockets[1].invoke("emit", "action", { cmd: MessageType.Leave }, deferreds[0].resolve);
         });
 
-      function ack() {
-        done();
-      }
+      // The pending game will be updated twice -- once when player 2 joins, and again when player 2
+      // leaves. The second time, ensure there's only one player left (player 1)
+      let calls = 0;
+      qSockets[0].invoke("on", "action", function(action) {
+        if(action.cmd !== MessageType.PendingGameUpdated)
+          return;
+
+        if(++calls === 2) {
+          assert.equal(action.gameDescription.users.length, 1);
+          deferreds[1].resolve();
+        }
+      });
+
+      return q.all(_.map(deferreds, "promise"));
     });
 
     it("can list the current games", function(done) {
