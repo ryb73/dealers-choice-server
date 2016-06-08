@@ -31,6 +31,7 @@ describe("ConnectionHandler", function() {
   });
 
   afterEach(function(done) {
+    this.timeout(5000);
     server.destroy();
     server.on("close", done);
     server = null;
@@ -294,9 +295,9 @@ describe("ConnectionHandler", function() {
 
       q.all([ act.joinGame(qSockets[1], qGameId),
               act.joinGame(qSockets[2], qGameId) ])
-        .then(function() {
+        .done(function() {
           let response = act.startGame(qSockets[0]);
-          assert.eventually.equal(response.get("result"),
+          return assert.eventually.equal(response.get("result"),
             ResponseCode.StartOk);
         });
 
@@ -332,8 +333,10 @@ describe("ConnectionHandler", function() {
 
       function handleConclusion(playerIdx, msg) {
         assert.equal(msg.conclusion, RpsConclusion.Winner);
-        assert.eventually.equal(qPlayerId1, msg.winnerId);
-        deferrals[playerIdx].resolve();
+        qPlayerId1.done((playerId1) => {
+          assert.equal(playerId1, msg.winnerId);
+          deferrals[playerIdx].resolve();
+        });
       }
 
       let promises = deferrals.map(function(deferred) {
