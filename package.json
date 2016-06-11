@@ -28,7 +28,7 @@
     "lodash": "4.11.1",
     "node-uuid": "^1.4.3",
     "rpb-logging": "^2.3.0",
-    "socket.io": "1.4.5",
+    "socket.io": "1.4.6",
     "spyback": "1.0.0",
     "swappable-proxy": "2.0.0"
   },
@@ -40,6 +40,6 @@
     "q": "^1.4.1",
     "server-destroy": "^1.0.1",
     "sinon": "^1.15.4",
-    "socket.io-client": "1.4.5"
+    "socket.io-client": "1.4.6"
   }
 }

@@ -108,60 +108,6 @@ describe("ConnectionHandler", function() {
         });
     });
 
-    it("relays chat messages to in-game players", function() {
-      let qSockets = prepareNPlayers(4);
-
-      let qCreateResult = act.createGame(qSockets[0]);
-      let qGameId = qCreateResult.get("gameDescription").get("id");
-      let qPlayerId1 = qCreateResult.get("playerId");
-
-      let qJoinPlayer2 = act.joinGame(qSockets[1], qGameId);
-      let qJoinPlayer3 = act.joinGame(qSockets[2], qGameId);
-
-      // Once all players have joined, send chat
-      let chatMsg = {
-        cmd: "chat",
-        message: "sup"
-      };
-      q.all([ qJoinPlayer2, qJoinPlayer3 ])
-        .thenResolve(qSockets[0])
-        .invoke("emit", "action", chatMsg, ack);
-
-      // The player that sent the chat and the player
-      // that's not even in the game should not get the
-      // chat; the other players should.
-      qSockets[0].invoke("on", "chat", didntGetChat);
-      qSockets[1].invoke("on", "chat", gotChat.bind(null, 0));
-      qSockets[2].invoke("on", "chat", gotChat.bind(null, 1));
-      qSockets[3].invoke("on", "chat", didntGetChat);
-
-      let deferrals = makeDeferrals(4);
-      function gotChat(defferedIdx, msg) {
-        assert.eventually.equal(qPlayerId1, msg.playerId, "player IDs unequal")
-          .then(deferrals[2].resolve)
-          .catch(deferrals[2].reject);
-
-        assert.equal(msg.message, "sup");
-        deferrals[defferedIdx].resolve();
-      }
-
-      // Make sure the player that sent the chat gets
-      // an acknowledgement.
-      function ack(response) {
-        assert.equal(response.result, ResponseCode.ChatSent);
-        deferrals[3].resolve();
-      }
-
-      function didntGetChat() {
-        assert.fail();
-      }
-
-      let promises = deferrals.map(function(deferred) {
-        return deferred.promise;
-      });
-      return q.all(promises);
-    });
-
     it("only allows 6 players", function(done) {
       let qSockets = prepareNPlayers(7);
       let qGameId = act.createGame(qSockets[0]).get("gameDescription").get("id");
@@ -289,6 +235,31 @@ describe("ConnectionHandler", function() {
   });
 
   describe("during the game", function() {
+    it.only("sends state when requested", function() {
+      let qSockets = prepareNPlayers(2);
+      let qCreateResult = act.createGame(qSockets[0]);
+      let qGameId = qCreateResult.get("gameDescription").get("id");
+
+      return act.joinGame(qSockets[1], qGameId)
+        .then(function() {
+          return act.startGame(qSockets[0]);
+        })
+        .then(function(response) {
+          assert.equal(response.result, ResponseCode.StartOk);
+
+          let deferred = q.defer();
+          qSockets[0].invoke("emit", "action", { cmd: MessageType.GetState }, (gameState) => {
+            assert.equal(gameState.users.length, 2);
+            assert.ok(gameState.users[0].player);
+            assert.ok(gameState.users[0].player.cars);
+            console.log(gameState);
+            deferred.resolve();
+          });
+
+          return deferred.promise;
+        });
+    });
+
     it("starts the game with rock paper scissors", function() {
       let qSockets = prepareNPlayers(3);
 
