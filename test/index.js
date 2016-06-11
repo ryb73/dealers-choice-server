@@ -235,7 +235,7 @@ describe("ConnectionHandler", function() {
   });
 
   describe("during the game", function() {
-    it.only("sends state when requested", function() {
+    it("sends state when requested", function() {
       let qSockets = prepareNPlayers(2);
       let qCreateResult = act.createGame(qSockets[0]);
       let qGameId = qCreateResult.get("gameDescription").get("id");
@@ -252,7 +252,6 @@ describe("ConnectionHandler", function() {
             assert.equal(gameState.users.length, 2);
             assert.ok(gameState.users[0].player);
             assert.ok(gameState.users[0].player.cars);
-            console.log(gameState);
             deferred.resolve();
           });
 
