@@ -92,6 +92,11 @@ function MockGame($numPlayers, $moves, $expectation) {
     return "p" + i;
   }
 
+  function getPlayerIndexById(playerId) {
+    return _.findIndex(players, { id: playerId });
+  }
+  this.getPlayerIndexById = getPlayerIndexById;
+
   Object.defineProperties(this, {
     players: {
       enumerable: true,

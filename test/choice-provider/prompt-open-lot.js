@@ -1,10 +1,6 @@
 "use strict";
 /* jshint mocha: true */
 
-const config = require("config").get("dc-server");
-config.testing = true;
-config.logLevel = "warn";
-
 const chai           = require("chai"),
       chaiAsPromised = require("chai-as-promised"),
       sinon          = require("sinon"),

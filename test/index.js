@@ -3,9 +3,6 @@
 
 const config = require("config").get("dc-server"),
       q      = require("q");
-config.testing = true;
-config.logLevel = "warn";
-config.validateUserId = function() { return q(true); };
 
 const _              = require("lodash"),
       chai           = require("chai"),
@@ -268,10 +265,13 @@ describe("ConnectionHandler", function() {
 
       q.all([ act.joinGame(qSockets[1], qGameId),
               act.joinGame(qSockets[2], qGameId) ])
-        .done(function() {
+        .then(function() {
           let response = act.startGame(qSockets[0]);
           return assert.eventually.equal(response.get("result"),
             ResponseCode.StartOk);
+        })
+        .done(function() {
+          qSockets[0].invoke("emit", "action", { cmd: MessageType.ActuallyReady });
         });
 
       qSockets[0].invoke("on", "action", handleAction.bind(null, 0));
@@ -280,6 +280,9 @@ describe("ConnectionHandler", function() {
 
       function handleAction(playerIdx, msg) {
         switch(msg.cmd) {
+          case MessageType.GameStarted:
+            qSockets[playerIdx].invoke("emit", "action", { cmd: MessageType.ActuallyReady });
+            break;
           case MessageType.RockPaperScissors:
             handleRps(playerIdx, msg);
             break;

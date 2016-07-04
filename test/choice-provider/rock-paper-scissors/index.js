@@ -1,10 +1,6 @@
 "use strict";
 /* jshint mocha: true */
 
-const config = require("config").get("dc-server");
-config.testing = true;
-config.logLevel = "warn";
-
 const chai              = require("chai"),
       chaiAsPromised    = require("chai-as-promised"),
       q                 = require("q"),
@@ -94,8 +90,9 @@ function runGame(gameMoves, winner, expectation) {
     broadcast: game.generateActionHandler(rps)
   };
 
-  let qWinnerTest = assert.eventually
-    .equal(rps.handleIt(onAction), game.players[winner].id);
+  let qWinnerTest = assert.eventually.equal(
+    rps.handleIt(onAction), winner, "Mismatched winner"
+  );
 
   return q.all([ qWinnerTest, game.qConclusion ]);
 }

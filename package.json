@@ -4,8 +4,8 @@
   "description": "Server for Dealer's Choice game.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --harmony --harmony-proxies --recursive",
-    "cover": "node --harmony --harmony-proxies ./node_modules/istanbul-harmony/lib/cli.js cover --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --recursive",
+    "test": "NODE_ENV=test mocha --harmony --harmony-proxies --recursive",
+    "cover": "NODE_ENV=test node --harmony --harmony-proxies ./node_modules/istanbul-harmony/lib/cli.js cover --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --recursive",
     "start": "node --harmony --harmony-proxies ."
   },
   "repository": {
@@ -35,6 +35,7 @@
   "devDependencies": {
     "chai": "^3.0.0",
     "chai-as-promised": "5.3.0",
+    "dc-test": "1.0.3",
     "istanbul-harmony": "^0.3.16",
     "mocha": "^2.2.5",
     "q": "^1.4.1",
