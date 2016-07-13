@@ -115,7 +115,7 @@ module.exports = {
         insuranceDeck: [{
           constructor: Insurance,
           args: [ Insurance.protections.Fire ],
-          count: 20, // TODO: figure out actual number
+          count: 2, // TODO: figure out actual number
           additionalProperties: {
             title: "Fire",
             value: "Collect List Price"
@@ -151,7 +151,7 @@ module.exports = {
         },{
           constructor: Insurance,
           args: [ Insurance.protections.Theft ],
-          count: 20,
+          count: 2,
           additionalProperties: {
             title: "Theft",
             value: "Collect List Price"
@@ -168,7 +168,7 @@ module.exports = {
         },{
           constructor: Insurance,
           args: [ Insurance.protections.Collision ],
-          count: 20,
+          count: 2,
           additionalProperties: {
             title: "Collision",
             value: "Collect List Price"
