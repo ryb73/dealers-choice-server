@@ -16,6 +16,8 @@ const _              = require("lodash"),
       Server         = require("../lib/server"),
       act            = require("./act");
 
+const debug = require("debug")("rpb");
+
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
@@ -31,6 +33,7 @@ describe("ConnectionHandler", function() {
     this.timeout(5000);
     // Had this fail once. idk why but too lazy to investigate further
     if(server) {
+      debug("closing");
       server.on("close", done);
       server.destroy();
       server = null;
