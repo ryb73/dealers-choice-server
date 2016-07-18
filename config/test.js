@@ -5,7 +5,7 @@ const q              = require("q"),
 
 module.exports = {
   "dc-server": {
-    port: 3000,
+    port: 5000,
     facebook: {
       appId: "409903325878723",
       appSecret: "e6c47409dfbf573628c9d0aafffd3d25"
