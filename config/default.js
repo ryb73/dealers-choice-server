@@ -24,6 +24,7 @@ module.exports = {
           args: [Attack.fire],
           count: 3,
           additionalProperties: {
+            key: "fire",
             title: "Fire",
             description: "Car destroyed. Force another dealer to send one of his cars of your choice " +
                           "to Auto Discard."
@@ -33,6 +34,7 @@ module.exports = {
           args: [Attack.collision],
           count: 3,
           additionalProperties: {
+            key: "collision",
             title: "Collision",
             description: "Force another dealer to return one of his cars of your choice to Auto " +
                           "Exchange or he may pay repair bill of ½ List Price to bank and keep car."
@@ -42,6 +44,7 @@ module.exports = {
           args: [Attack.theft],
           count: 2,
           additionalProperties: {
+            key: "theft",
             title: "Car Stolen",
             description: "Force another dealer to return one of his cars of your choice to the Auto " +
                           "Exchange."
@@ -51,6 +54,7 @@ module.exports = {
           args: [Attack.rancidPopcorn],
           count: 1,
           additionalProperties: {
+            key: "rancid",
             title: "Rancid Popcorn",
             description: "Attack another car with rancid popcorn."
           }
@@ -59,6 +63,7 @@ module.exports = {
           args: [200],
           count: 3,
           additionalProperties: {
+            key: "buy200",
             title: "Buy for $200",
             description: "Buy a car from Auto Exchange for $200."
           }
@@ -67,6 +72,7 @@ module.exports = {
           args: [],
           count: 2,
           additionalProperties: {
+            key: "free",
             title: "Free",
             description: "Receive one free Insurance Policy."
           }
@@ -75,6 +81,7 @@ module.exports = {
           args: [3000],
           count: 1,
           additionalProperties: {
+            key: "bb3",
             title: "Blue Book + 3",
             description: "Sell a car for Blue Book price plus $3000."
           }
@@ -83,6 +90,7 @@ module.exports = {
           args: [0],
           count: 4,
           additionalProperties: {
+            key: "bb",
             title: "Blue Book",
             description: "Sell a car for Blue Book price."
           }
@@ -91,6 +99,7 @@ module.exports = {
           args: [0],
           count: 4,
           additionalProperties: {
+            key: "list",
             title: "List",
             description: "Sell a car for List Price."
           }
@@ -99,6 +108,7 @@ module.exports = {
           args: [2000],
           count: 2,
           additionalProperties: {
+            key: "list2",
             title: "List + 2",
             description: "Sell a car for List Price plus $2000."
           }
@@ -107,6 +117,7 @@ module.exports = {
           args: [3000],
           count: 1,
           additionalProperties: {
+            key: "list3",
             title: "List + 3",
             description: "Sell a car for List Price plus $3000."
           }
@@ -117,6 +128,7 @@ module.exports = {
           args: [ Insurance.protections.Fire ],
           count: 2, // TODO: figure out actual number
           additionalProperties: {
+            key: "fire",
             title: "Fire",
             value: "Collect List Price"
           }
@@ -126,6 +138,7 @@ module.exports = {
                   Insurance.protections.Theft ],
           count: 1,
           additionalProperties: {
+            key: "comprehensive",
             title: "Comprehensive",
             protection: "Fire, Theft, Collision",
             value: "Collect List Price"
@@ -135,6 +148,7 @@ module.exports = {
           args: [ ],
           count: 1,
           additionalProperties: {
+            key: "chickens",
             title: "Fly By Night",
             protection: "Roving Band of Chickens",
             value: "No Value"
@@ -144,6 +158,7 @@ module.exports = {
           args: [ Insurance.protections.RancidPopcorn ],
           count: 1,
           additionalProperties: {
+            key: "rancid",
             title: "Fly By Night",
             protection: "Rancid Popcorn",
             value: "Collect List Price"
@@ -153,6 +168,7 @@ module.exports = {
           args: [ Insurance.protections.Theft ],
           count: 2,
           additionalProperties: {
+            key: "theft",
             title: "Theft",
             value: "Collect List Price"
           }
@@ -161,6 +177,7 @@ module.exports = {
           args: [ ],
           count: 1,
           additionalProperties: {
+            key: "galoshes",
             title: "Fly By Night",
             protection: "Leaky Galoshes",
             value: "No Value"
@@ -170,6 +187,7 @@ module.exports = {
           args: [ Insurance.protections.Collision ],
           count: 2,
           additionalProperties: {
+            key: "collision",
             title: "Collision",
             value: "Collect List Price"
           }
@@ -213,6 +231,7 @@ function createCarConfig() {
       args: [ id, cars[id] ],
       count: 1,
       additionalProperties: {
+        key: id,
         image: "car" + id,
         imageSm: "car" + id + "s"
       }
