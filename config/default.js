@@ -231,7 +231,7 @@ function createCarConfig() {
       args: [ id, cars[id] ],
       count: 1,
       additionalProperties: {
-        key: id,
+        key: +id,
         image: "car" + id,
         imageSm: "car" + id + "s"
       }
