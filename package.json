@@ -20,15 +20,15 @@
   "homepage": "https://github.com/ryb73/dealers-choice-server",
   "dependencies": {
     "component-emitter": "^1.2.0",
-    "config": "^1.14.0",
-    "express": "^4.12.3",
-    "fb": "1.0.2",
+    "config": "1.21.0",
+    "express": "4.14.0",
+    "fb": "1.1.1",
     "give-unique-id": "^1.0.0",
     "iterator-to-array": "^1.0.0",
-    "lodash": "4.13.1",
+    "lodash": "4.15.0",
     "node-uuid": "^1.4.3",
     "rpb-logging": "^2.3.0",
-    "socket.io": "1.4.6",
+    "socket.io": "1.4.8",
     "spyback": "1.0.0",
     "swappable-proxy": "2.0.0"
   },
@@ -37,10 +37,10 @@
     "chai-as-promised": "5.3.0",
     "dc-test": "1.0.3",
     "istanbul": "0.4.4",
-    "mocha": "^2.2.5",
+    "mocha": "3.0.2",
     "q": "^1.4.1",
     "server-destroy": "^1.0.1",
-    "sinon": "^1.15.4",
-    "socket.io-client": "1.4.6"
+    "sinon": "1.17.5",
+    "socket.io-client": "1.4.8"
   }
 }
