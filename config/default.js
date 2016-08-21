@@ -18,183 +18,191 @@ module.exports = {
       appSecret: "e6c47409dfbf573628c9d0aafffd3d25"
     },
 
-    deckConfig: {
-        dcDeck: [{
-          constructor: Attack,
-          args: [Attack.fire],
-          count: 3,
-          additionalProperties: {
-            key: "fire",
-            title: "Fire",
-            description: "Car destroyed. Force another dealer to send one of his cars of your choice " +
-                          "to Auto Discard."
-          }
-        }, {
-          constructor: Attack,
-          args: [Attack.collision],
-          count: 3,
-          additionalProperties: {
-            key: "collision",
-            title: "Collision",
-            description: "Force another dealer to return one of his cars of your choice to Auto " +
-                          "Exchange or he may pay repair bill of ½ List Price to bank and keep car."
-          }
-        }, {
-          constructor: Attack,
-          args: [Attack.theft],
-          count: 2,
-          additionalProperties: {
-            key: "theft",
-            title: "Car Stolen",
-            description: "Force another dealer to return one of his cars of your choice to the Auto " +
-                          "Exchange."
-          }
-        }, {
-          constructor: Attack,
-          args: [Attack.rancidPopcorn],
-          count: 1,
-          additionalProperties: {
-            key: "rancid",
-            title: "Rancid Popcorn",
-            description: "Attack another car with rancid popcorn."
-          }
-        }, {
-          constructor: BuyFromAutoExchangeForN, // Buy for 200
-          args: [200],
-          count: 3,
-          additionalProperties: {
-            key: "buy200",
-            title: "Buy for $200",
-            description: "Buy a car from Auto Exchange for $200."
-          }
-        }, {
-          constructor: Free,
-          args: [],
-          count: 2,
-          additionalProperties: {
-            key: "free",
-            title: "Free",
-            description: "Receive one free Insurance Policy."
-          }
-        }, {
-          constructor: SellForBlueBookPlusN, // BB + 3
-          args: [3000],
-          count: 1,
-          additionalProperties: {
-            key: "bb3",
-            title: "Blue Book + 3",
-            description: "Sell a car for Blue Book price plus $3000."
-          }
-        }, {
-          constructor: SellForBlueBookPlusN, // BB
-          args: [0],
-          count: 4,
-          additionalProperties: {
-            key: "bb",
-            title: "Blue Book",
-            description: "Sell a car for Blue Book price."
-          }
-        }, {
-          constructor: SellForListPlusN, // List
-          args: [0],
-          count: 4,
-          additionalProperties: {
-            key: "list",
-            title: "List",
-            description: "Sell a car for List Price."
-          }
-        }, {
-          constructor: SellForListPlusN, // List + 2
-          args: [2000],
-          count: 2,
-          additionalProperties: {
-            key: "list2",
-            title: "List + 2",
-            description: "Sell a car for List Price plus $2000."
-          }
-        }, {
-          constructor: SellForListPlusN, // List + 3
-          args: [3000],
-          count: 1,
-          additionalProperties: {
-            key: "list3",
-            title: "List + 3",
-            description: "Sell a car for List Price plus $3000."
-          }
-        }],
-        carDeck: createCarConfig(),
-        insuranceDeck: [{
-          constructor: Insurance,
-          args: [ Insurance.protections.Fire ],
-          count: 2, // TODO: figure out actual number
-          additionalProperties: {
-            key: "fire",
-            title: "Fire",
-            value: "Collect List Price"
-          }
-        },{
-          constructor: Insurance,
-          args: [ Insurance.protections.Fire, Insurance.protections.Collision,
-                  Insurance.protections.Theft ],
-          count: 1,
-          additionalProperties: {
-            key: "comprehensive",
-            title: "Comprehensive",
-            protection: "Fire, Theft, Collision",
-            value: "Collect List Price"
-          }
-        },{
-          constructor: Insurance,
-          args: [ ],
-          count: 1,
-          additionalProperties: {
-            key: "chickens",
-            title: "Fly By Night",
-            protection: "Roving Band of Chickens",
-            value: "No Value"
-          }
-        },{
-          constructor: Insurance,
-          args: [ Insurance.protections.RancidPopcorn ],
-          count: 1,
-          additionalProperties: {
-            key: "rancid",
-            title: "Fly By Night",
-            protection: "Rancid Popcorn",
-            value: "Collect List Price"
-          }
-        },{
-          constructor: Insurance,
-          args: [ Insurance.protections.Theft ],
-          count: 2,
-          additionalProperties: {
-            key: "theft",
-            title: "Theft",
-            value: "Collect List Price"
-          }
-        },{
-          constructor: Insurance,
-          args: [ ],
-          count: 1,
-          additionalProperties: {
-            key: "galoshes",
-            title: "Fly By Night",
-            protection: "Leaky Galoshes",
-            value: "No Value"
-          }
-        },{
-          constructor: Insurance,
-          args: [ Insurance.protections.Collision ],
-          count: 2,
-          additionalProperties: {
-            key: "collision",
-            title: "Collision",
-            value: "Collect List Price"
-          }
-        },]
-    }
+    deckConfig: createDeckConfig()
+  },
+
+  "dc-db-interface": {
+    db: "dc"
   }
 };
+
+function createDeckConfig() {
+  return {
+    dcDeck: [{
+      constructor: Attack,
+      args: [Attack.fire],
+      count: 3,
+      additionalProperties: {
+        key: "fire",
+        title: "Fire",
+        description: "Car destroyed. Force another dealer to send one of his cars of your choice " +
+                      "to Auto Discard."
+      }
+    }, {
+      constructor: Attack,
+      args: [Attack.collision],
+      count: 3,
+      additionalProperties: {
+        key: "collision",
+        title: "Collision",
+        description: "Force another dealer to return one of his cars of your choice to Auto " +
+                      "Exchange or he may pay repair bill of ½ List Price to bank and keep car."
+      }
+    }, {
+      constructor: Attack,
+      args: [Attack.theft],
+      count: 2,
+      additionalProperties: {
+        key: "theft",
+        title: "Car Stolen",
+        description: "Force another dealer to return one of his cars of your choice to the Auto " +
+                      "Exchange."
+      }
+    }, {
+      constructor: Attack,
+      args: [Attack.rancidPopcorn],
+      count: 1,
+      additionalProperties: {
+        key: "rancid",
+        title: "Rancid Popcorn",
+        description: "Attack another car with rancid popcorn."
+      }
+    }, {
+      constructor: BuyFromAutoExchangeForN, // Buy for 200
+      args: [200],
+      count: 3,
+      additionalProperties: {
+        key: "buy200",
+        title: "Buy for $200",
+        description: "Buy a car from Auto Exchange for $200."
+      }
+    }, {
+      constructor: Free,
+      args: [],
+      count: 2,
+      additionalProperties: {
+        key: "free",
+        title: "Free",
+        description: "Receive one free Insurance Policy."
+      }
+    }, {
+      constructor: SellForBlueBookPlusN, // BB + 3
+      args: [3000],
+      count: 1,
+      additionalProperties: {
+        key: "bb3",
+        title: "Blue Book + 3",
+        description: "Sell a car for Blue Book price plus $3000."
+      }
+    }, {
+      constructor: SellForBlueBookPlusN, // BB
+      args: [0],
+      count: 4,
+      additionalProperties: {
+        key: "bb",
+        title: "Blue Book",
+        description: "Sell a car for Blue Book price."
+      }
+    }, {
+      constructor: SellForListPlusN, // List
+      args: [0],
+      count: 4,
+      additionalProperties: {
+        key: "list",
+        title: "List",
+        description: "Sell a car for List Price."
+      }
+    }, {
+      constructor: SellForListPlusN, // List + 2
+      args: [2000],
+      count: 2,
+      additionalProperties: {
+        key: "list2",
+        title: "List + 2",
+        description: "Sell a car for List Price plus $2000."
+      }
+    }, {
+      constructor: SellForListPlusN, // List + 3
+      args: [3000],
+      count: 1,
+      additionalProperties: {
+        key: "list3",
+        title: "List + 3",
+        description: "Sell a car for List Price plus $3000."
+      }
+    }],
+    carDeck: createCarConfig(),
+    insuranceDeck: [{
+      constructor: Insurance,
+      args: [ Insurance.protections.Fire ],
+      count: 2, // TODO: figure out actual number
+      additionalProperties: {
+        key: "fire",
+        title: "Fire",
+        value: "Collect List Price"
+      }
+    },{
+      constructor: Insurance,
+      args: [ Insurance.protections.Fire, Insurance.protections.Collision,
+              Insurance.protections.Theft ],
+      count: 1,
+      additionalProperties: {
+        key: "comprehensive",
+        title: "Comprehensive",
+        protection: "Fire, Theft, Collision",
+        value: "Collect List Price"
+      }
+    },{
+      constructor: Insurance,
+      args: [ ],
+      count: 1,
+      additionalProperties: {
+        key: "chickens",
+        title: "Fly By Night",
+        protection: "Roving Band of Chickens",
+        value: "No Value"
+      }
+    },{
+      constructor: Insurance,
+      args: [ Insurance.protections.RancidPopcorn ],
+      count: 1,
+      additionalProperties: {
+        key: "rancid",
+        title: "Fly By Night",
+        protection: "Rancid Popcorn",
+        value: "Collect List Price"
+      }
+    },{
+      constructor: Insurance,
+      args: [ Insurance.protections.Theft ],
+      count: 2,
+      additionalProperties: {
+        key: "theft",
+        title: "Theft",
+        value: "Collect List Price"
+      }
+    },{
+      constructor: Insurance,
+      args: [ ],
+      count: 1,
+      additionalProperties: {
+        key: "galoshes",
+        title: "Fly By Night",
+        protection: "Leaky Galoshes",
+        value: "No Value"
+      }
+    },{
+      constructor: Insurance,
+      args: [ Insurance.protections.Collision ],
+      count: 2,
+      additionalProperties: {
+        key: "collision",
+        title: "Collision",
+        value: "Collect List Price"
+      }
+    }]
+  };
+}
 
 function createCarConfig() {
   let cars = {
