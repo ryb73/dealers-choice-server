@@ -6,6 +6,7 @@ const cardPack                = require("dc-card-pack"),
       Free                    = cardPack.Free,
       SellForBlueBookPlusN    = cardPack.SellForBlueBookPlusN,
       SellForListPlusN        = cardPack.SellForListPlusN,
+      LotClosed               = cardPack.LotClosed,
       dcEngine                = require("dc-engine"),
       Car                     = dcEngine.Car,
       Insurance               = dcEngine.Insurance;
@@ -130,8 +131,20 @@ function createDeckConfig() {
         title: "List + 3",
         description: "Sell a car for List Price plus $3000."
       }
+    }, {
+      constructor: LotClosed,
+      args: [],
+      count: 2,
+      additionalProperties: {
+        key: "lot-closed",
+        title: "Lot Closed",
+        description: "No deal required.\nMay be used to cancel either a \"FORCED SALE\" or \"BUY\" " +
+                      "card when it is played on you."
+      }
     }],
+
     carDeck: createCarConfig(),
+
     insuranceDeck: [{
       constructor: Insurance,
       args: [ Insurance.protections.Fire ],
