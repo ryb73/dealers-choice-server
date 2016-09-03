@@ -35,7 +35,7 @@
   "devDependencies": {
     "chai": "^3.0.0",
     "chai-as-promised": "5.3.0",
-    "dc-test": "1.0.3",
+    "dc-test": "1.1.1",
     "istanbul": "0.4.4",
     "mocha": "3.0.2",
     "q": "^1.4.1",
